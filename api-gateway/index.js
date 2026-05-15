@@ -7,16 +7,25 @@ const protoLoader = require('@grpc/proto-loader');
 const path = require('path');
 
 const app = express();
-app.use(cors());
-app.use(express.json());
 
-// ICI - avant tout le reste
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Routes HTML
 app.get('/', (req, res) => {
   res.sendFile(path.resolve(__dirname, '../client/index.html'));
 });
 app.get('/admin', (req, res) => {
   res.sendFile(path.resolve(__dirname, '../client/admin.html'));
 });
+
+// gRPC setup
 const productsDef = protoLoader.loadSync(path.join(__dirname, '../proto/products.proto'),
   { keepCase: true, longs: String, enums: String, defaults: true, oneofs: true });
 const ordersDef = protoLoader.loadSync(path.join(__dirname, '../proto/orders.proto'),
@@ -41,6 +50,7 @@ function grpcCall(client, method, request) {
   });
 }
 
+// REST endpoints
 app.post('/products', async (req, res) => {
   try { res.json(await grpcCall(productsClient, 'createProduct', req.body)); }
   catch (err) { res.status(500).json({ error: err.message }); }
@@ -70,6 +80,7 @@ app.get('/notifications', async (req, res) => {
   catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+// GraphQL
 const typeDefs = `
   type Product { id: Int name: String description: String price: Float stock: Int }
   type Order { id: Int product_id: Int quantity: Int customer_name: String status: String }
@@ -104,7 +115,14 @@ const resolvers = {
 async function main() {
   const server = new ApolloServer({ typeDefs, resolvers });
   await server.start();
-  app.use('/graphql', expressMiddleware(server));
+
+  app.use('/graphql',
+    cors({ origin: '*' }),
+    express.json(),
+    expressMiddleware(server, {
+      context: async ({ req }) => ({ req })
+    })
+  );
 
   app.listen(3000, () => {
     console.log('API Gateway demarree sur http://localhost:3000');
