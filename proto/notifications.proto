@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package notifications;
+
+service NotificationService {
+  rpc GetNotifications (Empty) returns (NotificationListResponse);
+}
+
+message Empty {}
+
+message NotificationResponse {
+  string id = 1;
+  string message = 2;
+  string type = 3;
+  string created_at = 4;
+}
+
+message NotificationListResponse {
+  repeated NotificationResponse notifications = 1;
+}
