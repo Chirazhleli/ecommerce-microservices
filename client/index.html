@@ -3,282 +3,959 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ecommerce Microservices</title>
+  <title>LUXE — Accessoires</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Raleway:wght@300;400;500;600&family=Cormorant+Garamond:ital,wght@0,300;1,300&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --black: #0a0a0a;
+      --gold: #c9a96e;
+      --gold-light: #e8c98a;
+      --cream: #f5f0e8;
+      --white: #ffffff;
+      --gray: #888;
+      --dark-gray: #1a1a1a;
+      --mid-gray: #2a2a2a;
+    }
+
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; color: #333; }
 
-    header {
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      color: white;
-      padding: 20px 40px;
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    body {
+      background: var(--black);
+      color: var(--white);
+      font-family: 'Raleway', sans-serif;
+      font-weight: 300;
+      overflow-x: hidden;
+      cursor: none;
     }
-    header h1 { font-size: 24px; font-weight: 600; }
-    header span { font-size: 13px; opacity: 0.8; }
 
-    .status-bar {
-      background: white;
-      padding: 12px 40px;
-      display: flex;
-      gap: 24px;
-      border-bottom: 1px solid #e0e0e0;
-      font-size: 13px;
+    /* Custom cursor */
+    .cursor {
+      width: 8px; height: 8px;
+      background: var(--gold);
+      border-radius: 50%;
+      position: fixed;
+      pointer-events: none;
+      z-index: 9999;
+      transition: transform 0.1s;
     }
-    .status-item { display: flex; align-items: center; gap: 6px; }
-    .dot { width: 8px; height: 8px; border-radius: 50%; background: #4caf50; animation: pulse 2s infinite; }
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+    .cursor-ring {
+      width: 36px; height: 36px;
+      border: 1px solid var(--gold);
+      border-radius: 50%;
+      position: fixed;
+      pointer-events: none;
+      z-index: 9998;
+      transition: all 0.15s ease;
+      opacity: 0.6;
+    }
 
-    .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    /* NAV */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 28px 60px;
+      background: linear-gradient(to bottom, rgba(10,10,10,0.95), transparent);
+      backdrop-filter: blur(10px);
+    }
+    .nav-logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 26px;
+      letter-spacing: 6px;
+      color: var(--gold);
+      text-decoration: none;
+    }
+    .nav-links {
+      display: flex; gap: 40px; list-style: none;
+    }
+    .nav-links a {
+      color: var(--cream);
+      text-decoration: none;
+      font-size: 12px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      transition: color 0.3s;
+      cursor: none;
+    }
+    .nav-links a:hover { color: var(--gold); }
+    .nav-right { display: flex; gap: 24px; align-items: center; }
+    .cart-btn {
+      background: var(--gold);
+      color: var(--black);
+      border: none;
+      padding: 10px 28px;
+      font-family: 'Raleway', sans-serif;
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      cursor: none;
+      transition: all 0.3s;
+    }
+    .cart-btn:hover { background: var(--gold-light); transform: translateY(-1px); }
 
-    .card {
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    /* HERO */
+    .hero {
+      height: 100vh;
+      display: flex; align-items: center;
+      position: relative;
       overflow: hidden;
     }
-    .card-header {
-      padding: 16px 20px;
-      font-weight: 600;
-      font-size: 15px;
+    .hero-bg {
+      position: absolute; inset: 0;
+      background: 
+        radial-gradient(ellipse at 70% 50%, rgba(201,169,110,0.08) 0%, transparent 60%),
+        radial-gradient(ellipse at 20% 80%, rgba(201,169,110,0.05) 0%, transparent 50%);
+    }
+    .hero-lines {
+      position: absolute; inset: 0;
+      background-image: repeating-linear-gradient(
+        90deg, transparent, transparent 80px, rgba(255,255,255,0.02) 80px, rgba(255,255,255,0.02) 81px
+      );
+    }
+    .hero-content {
+      position: relative; z-index: 2;
+      padding: 0 60px;
+      max-width: 700px;
+    }
+    .hero-tag {
+      font-size: 11px;
+      letter-spacing: 5px;
+      color: var(--gold);
+      text-transform: uppercase;
+      margin-bottom: 24px;
+      opacity: 0;
+      animation: fadeUp 1s 0.3s forwards;
+    }
+    .hero-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(52px, 7vw, 96px);
+      line-height: 1.05;
+      margin-bottom: 28px;
+      opacity: 0;
+      animation: fadeUp 1s 0.5s forwards;
+    }
+    .hero-title em {
+      font-style: italic;
+      color: var(--gold);
+    }
+    .hero-sub {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 22px;
+      color: var(--gray);
+      margin-bottom: 48px;
+      line-height: 1.7;
+      opacity: 0;
+      animation: fadeUp 1s 0.7s forwards;
+    }
+    .hero-cta {
+      display: flex; gap: 20px; align-items: center;
+      opacity: 0;
+      animation: fadeUp 1s 0.9s forwards;
+    }
+    .btn-primary {
+      background: transparent;
+      border: 1px solid var(--gold);
+      color: var(--gold);
+      padding: 16px 48px;
+      font-family: 'Raleway', sans-serif;
+      font-size: 11px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      cursor: none;
+      transition: all 0.4s;
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-primary::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--gold);
+      transform: translateX(-100%);
+      transition: transform 0.4s ease;
+    }
+    .btn-primary:hover::before { transform: translateX(0); }
+    .btn-primary span { position: relative; z-index: 1; }
+    .btn-primary:hover span { color: var(--black); }
+    .btn-scroll {
+      color: var(--gray);
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      display: flex; align-items: center; gap: 12px;
+      cursor: none;
+    }
+    .btn-scroll::after {
+      content: '';
+      width: 40px; height: 1px;
+      background: var(--gray);
+    }
+    .hero-image {
+      position: absolute; right: 0; top: 0; bottom: 0;
+      width: 45%;
+      opacity: 0;
+      animation: fadeIn 1.5s 0.8s forwards;
+    }
+    .hero-image img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      opacity: 0.5;
+      filter: grayscale(30%);
+    }
+    .hero-image::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 40%;
+      background: linear-gradient(to right, var(--black), transparent);
+      z-index: 1;
+    }
+
+    /* MARQUEE */
+    .marquee-wrap {
+      border-top: 1px solid #1e1e1e;
+      border-bottom: 1px solid #1e1e1e;
+      padding: 18px 0;
+      overflow: hidden;
+      background: var(--dark-gray);
+    }
+    .marquee-track {
       display: flex;
+      animation: marquee 20s linear infinite;
+      white-space: nowrap;
+    }
+    .marquee-item {
+      font-size: 11px;
+      letter-spacing: 4px;
+      color: var(--gold);
+      text-transform: uppercase;
+      padding: 0 48px;
+    }
+    .marquee-dot {
+      color: var(--gray);
+      padding: 0 16px;
+    }
+    @keyframes marquee {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+
+    /* SECTION */
+    section { padding: 120px 60px; }
+    .section-label {
+      font-size: 11px;
+      letter-spacing: 5px;
+      color: var(--gold);
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(36px, 4vw, 56px);
+      margin-bottom: 16px;
+    }
+    .section-title em { font-style: italic; color: var(--gold); }
+    .divider {
+      width: 60px; height: 1px;
+      background: var(--gold);
+      margin-bottom: 60px;
+    }
+
+    /* PRODUCTS GRID */
+    .products-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 60px;
+    }
+    .filter-tabs {
+      display: flex; gap: 4px;
+    }
+    .filter-tab {
+      background: transparent;
+      border: 1px solid #333;
+      color: var(--gray);
+      padding: 8px 20px;
+      font-family: 'Raleway', sans-serif;
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      cursor: none;
+      transition: all 0.3s;
+    }
+    .filter-tab.active, .filter-tab:hover {
+      border-color: var(--gold);
+      color: var(--gold);
+    }
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 2px;
+    }
+    .product-card {
+      background: var(--dark-gray);
+      position: relative;
+      overflow: hidden;
+      cursor: none;
+      transition: transform 0.4s ease;
+    }
+    .product-card:hover { transform: scale(1.01); z-index: 2; }
+    .product-image {
+      aspect-ratio: 3/4;
+      overflow: hidden;
+      position: relative;
+      background: var(--mid-gray);
+    }
+    .product-image img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transition: transform 0.6s ease, opacity 0.4s;
+    }
+    .product-card:hover .product-image img { transform: scale(1.08); }
+    .product-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(to top, rgba(10,10,10,0.9) 0%, transparent 50%);
+      display: flex; flex-direction: column;
+      justify-content: flex-end;
+      padding: 28px;
+      transform: translateY(20px);
+      opacity: 0;
+      transition: all 0.4s ease;
+    }
+    .product-card:hover .product-overlay { opacity: 1; transform: translateY(0); }
+    .product-buy-btn {
+      background: var(--gold);
+      color: var(--black);
+      border: none;
+      padding: 12px;
+      font-family: 'Raleway', sans-serif;
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      cursor: none;
+      transition: background 0.3s;
+      width: 100%;
+    }
+    .product-buy-btn:hover { background: var(--gold-light); }
+    .product-badge {
+      position: absolute; top: 20px; left: 20px;
+      background: var(--gold);
+      color: var(--black);
+      font-size: 9px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 4px 12px;
+    }
+    .product-info {
+      padding: 20px 24px;
+    }
+    .product-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 18px;
+      margin-bottom: 6px;
+    }
+    .product-desc {
+      font-size: 12px;
+      color: var(--gray);
+      margin-bottom: 12px;
+      line-height: 1.6;
+    }
+    .product-footer {
+      display: flex;
+      justify-content: space-between;
       align-items: center;
-      gap: 10px;
-      border-bottom: 1px solid #f0f0f0;
     }
-    .card-header.purple { background: #f3f0ff; color: #6c3fc5; }
-    .card-header.blue   { background: #e8f4fd; color: #1976d2; }
-    .card-header.green  { background: #e8f5e9; color: #2e7d32; }
-    .card-header.orange { background: #fff3e0; color: #e65100; }
-
-    .icon { font-size: 20px; }
-    .card-body { padding: 20px; }
-
-    .form-group { margin-bottom: 12px; }
-    label { display: block; font-size: 12px; font-weight: 600; color: #666; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
-    input {
-      width: 100%; padding: 10px 12px; border: 1px solid #ddd;
-      border-radius: 8px; font-size: 14px; outline: none;
-      transition: border-color 0.2s;
+    .product-price {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 22px;
+      color: var(--gold);
     }
-    input:focus { border-color: #667eea; }
-
-    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-
-    button {
-      width: 100%; padding: 11px; border: none; border-radius: 8px;
-      font-size: 14px; font-weight: 600; cursor: pointer;
-      transition: opacity 0.2s, transform 0.1s;
-      margin-top: 4px;
+    .product-stock {
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: var(--gray);
+      text-transform: uppercase;
     }
-    button:hover { opacity: 0.9; }
-    button:active { transform: scale(0.98); }
-    .btn-purple { background: linear-gradient(135deg, #667eea, #764ba2); color: white; }
-    .btn-blue   { background: linear-gradient(135deg, #2196f3, #1565c0); color: white; }
-    .btn-green  { background: linear-gradient(135deg, #4caf50, #2e7d32); color: white; }
-    .btn-orange { background: linear-gradient(135deg, #ff9800, #e65100); color: white; }
-
-    .list { max-height: 220px; overflow-y: auto; }
-    .list-item {
-      padding: 12px; border-radius: 8px; margin-bottom: 8px;
-      font-size: 13px; border-left: 3px solid;
-      background: #fafafa;
+    .loading-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 2px;
     }
-    .list-item.product { border-color: #667eea; }
-    .list-item.order   { border-color: #2196f3; }
-    .list-item.notif   { border-color: #4caf50; }
-    .list-item strong  { display: block; margin-bottom: 2px; }
-    .badge {
-      display: inline-block; padding: 2px 8px; border-radius: 20px;
-      font-size: 11px; font-weight: 600; margin-top: 4px;
+    .skeleton {
+      background: var(--dark-gray);
+      aspect-ratio: 3/4;
+      animation: pulse 1.5s ease-in-out infinite;
     }
-    .badge.pending  { background: #fff3e0; color: #e65100; }
-    .badge.price    { background: #f3f0ff; color: #6c3fc5; }
-    .badge.stock    { background: #e8f5e9; color: #2e7d32; }
+    @keyframes pulse {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
+    }
 
-    .empty { text-align: center; color: #aaa; font-size: 13px; padding: 30px 0; }
+    /* ORDER FORM */
+    .order-section {
+      background: var(--dark-gray);
+      padding: 100px 60px;
+    }
+    .order-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: start;
+    }
+    .order-left h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 48px;
+      margin-bottom: 20px;
+    }
+    .order-left p {
+      color: var(--gray);
+      line-height: 1.8;
+      font-size: 14px;
+      margin-bottom: 40px;
+    }
+    .trust-item {
+      display: flex; align-items: center; gap: 16px;
+      margin-bottom: 20px;
+    }
+    .trust-icon {
+      width: 40px; height: 40px;
+      border: 1px solid var(--gold);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+    .trust-text {
+      font-size: 13px;
+      color: var(--cream);
+      letter-spacing: 1px;
+    }
+    .form-group { margin-bottom: 24px; }
+    .form-group label {
+      display: block;
+      font-size: 10px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 10px;
+    }
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid #333;
+      color: var(--white);
+      padding: 12px 0;
+      font-family: 'Raleway', sans-serif;
+      font-size: 14px;
+      outline: none;
+      cursor: none;
+      transition: border-color 0.3s;
+      -webkit-appearance: none;
+    }
+    .form-group select option { background: var(--dark-gray); }
+    .form-group input:focus,
+    .form-group select:focus { border-bottom-color: var(--gold); }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    .submit-btn {
+      background: var(--gold);
+      color: var(--black);
+      border: none;
+      padding: 18px 60px;
+      font-family: 'Raleway', sans-serif;
+      font-size: 11px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      cursor: none;
+      transition: all 0.3s;
+      width: 100%;
+      margin-top: 8px;
+    }
+    .submit-btn:hover { background: var(--gold-light); transform: translateY(-2px); }
+    .submit-btn:disabled { opacity: 0.5; transform: none; }
 
+    /* NOTIFICATIONS */
+    .notif-section { background: var(--black); }
+    .notif-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 2px;
+    }
+    .notif-card {
+      background: var(--dark-gray);
+      padding: 28px 32px;
+      border-left: 2px solid var(--gold);
+      position: relative;
+      overflow: hidden;
+    }
+    .notif-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 1px;
+      background: linear-gradient(to right, var(--gold), transparent);
+    }
+    .notif-type {
+      font-size: 9px;
+      letter-spacing: 3px;
+      color: var(--gold);
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .notif-message {
+      font-family: 'Playfair Display', serif;
+      font-size: 16px;
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+    .notif-time {
+      font-size: 11px;
+      color: var(--gray);
+      letter-spacing: 1px;
+    }
+    .empty-state {
+      grid-column: 1/-1;
+      text-align: center;
+      padding: 80px;
+    }
+    .empty-icon { font-size: 48px; margin-bottom: 20px; opacity: 0.3; }
+    .empty-text {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 24px;
+      color: var(--gray);
+      font-style: italic;
+    }
+
+    /* TOAST */
+    .toast-container {
+      position: fixed;
+      bottom: 40px; right: 40px;
+      z-index: 1000;
+      display: flex; flex-direction: column; gap: 12px;
+    }
     .toast {
-      position: fixed; bottom: 24px; right: 24px;
-      background: #333; color: white; padding: 12px 20px;
-      border-radius: 8px; font-size: 13px; opacity: 0;
-      transition: opacity 0.3s; z-index: 999;
+      background: var(--dark-gray);
+      border-left: 3px solid var(--gold);
+      padding: 20px 28px;
+      min-width: 320px;
+      animation: slideIn 0.4s ease;
+      display: flex; align-items: center; gap: 16px;
     }
-    .toast.show { opacity: 1; }
+    .toast.error { border-left-color: #c0392b; }
+    .toast-icon { font-size: 20px; }
+    .toast-msg {
+      font-size: 13px;
+      color: var(--cream);
+      line-height: 1.5;
+    }
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
 
-    .full-width { grid-column: 1 / -1; }
+    /* FOOTER */
+    footer {
+      background: var(--dark-gray);
+      padding: 60px;
+      border-top: 1px solid #1e1e1e;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .footer-logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px;
+      color: var(--gold);
+      letter-spacing: 6px;
+    }
+    .footer-text {
+      font-size: 12px;
+      color: var(--gray);
+      letter-spacing: 2px;
+    }
+    .footer-link {
+      font-size: 12px;
+      color: var(--gray);
+      text-decoration: none;
+      letter-spacing: 2px;
+      transition: color 0.3s;
+    }
+    .footer-link:hover { color: var(--gold); }
+
+    /* MODAL */
+    .modal-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.9);
+      z-index: 500;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(8px);
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--dark-gray);
+      padding: 60px;
+      max-width: 500px;
+      width: 90%;
+      border: 1px solid #2a2a2a;
+      animation: fadeUp 0.4s ease;
+    }
+    .modal h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+    .modal p { color: var(--gray); font-size: 14px; margin-bottom: 32px; }
+    .modal-close {
+      position: absolute; top: 20px; right: 20px;
+      background: none; border: none; color: var(--gray);
+      font-size: 24px; cursor: none;
+    }
+    .modal { position: relative; }
+
+    /* REFRESH BTN */
+    .refresh-btn {
+      background: transparent;
+      border: 1px solid #333;
+      color: var(--gray);
+      padding: 10px 24px;
+      font-family: 'Raleway', sans-serif;
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      cursor: none;
+      transition: all 0.3s;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .refresh-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+    /* ANIMATIONS */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* Admin link */
+    .admin-link {
+      color: var(--gray);
+      text-decoration: none;
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      transition: color 0.3s;
+      cursor: none;
+    }
+    .admin-link:hover { color: var(--gold); }
   </style>
 </head>
 <body>
 
-<header>
-  <div>
-    <h1>🛒 Ecommerce Microservices</h1>
-    <span>Architecture : API Gateway → gRPC → Microservices → Kafka</span>
-  </div>
-</header>
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
 
-<div class="status-bar">
-  <div class="status-item"><div class="dot"></div> API Gateway :3000</div>
-  <div class="status-item"><div class="dot"></div> Products :50051</div>
-  <div class="status-item"><div class="dot"></div> Orders :50052</div>
-  <div class="status-item"><div class="dot"></div> Notifications :50053</div>
-  <div class="status-item"><div class="dot"></div> Kafka :9092</div>
+<nav>
+  <a href="#" class="nav-logo">LUXE</a>
+  <ul class="nav-links">
+    <li><a href="#collection" cursor="none">Collection</a></li>
+    <li><a href="#order">Commander</a></li>
+    <li><a href="#notifications">Notifications</a></li>
+  </ul>
+  <div class="nav-right">
+    <a href="admin" class="admin-link">Admin</a>
+    <button class="cart-btn">Panier</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-lines"></div>
+  <div class="hero-content">
+    <p class="hero-tag">Collection Exclusive 2026</p>
+    <h1 class="hero-title">L'Art de<br>l'<em>Accessoire</em></h1>
+    <p class="hero-sub">Des pièces soigneusement sélectionnées pour révéler votre personnalité unique.</p>
+    <div class="hero-cta">
+      <button class="btn-primary" onclick="document.getElementById('collection').scrollIntoView({behavior:'smooth'})">
+        <span>Découvrir</span>
+      </button>
+      <span class="btn-scroll">Parcourir</span>
+    </div>
+  </div>
+  <div class="hero-image">
+    <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80" alt="Accessoires luxe">
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-wrap">
+  <div class="marquee-track">
+    <span class="marquee-item">Livraison Express</span><span class="marquee-dot">◆</span>
+    <span class="marquee-item">Qualité Premium</span><span class="marquee-dot">◆</span>
+    <span class="marquee-item">Retours Gratuits</span><span class="marquee-dot">◆</span>
+    <span class="marquee-item">Éditions Limitées</span><span class="marquee-dot">◆</span>
+    <span class="marquee-item">Paiement Sécurisé</span><span class="marquee-dot">◆</span>
+    <span class="marquee-item">Service Client 24/7</span><span class="marquee-dot">◆</span>
+    <span class="marquee-item">Livraison Express</span><span class="marquee-dot">◆</span>
+    <span class="marquee-item">Qualité Premium</span><span class="marquee-dot">◆</span>
+    <span class="marquee-item">Retours Gratuits</span><span class="marquee-dot">◆</span>
+    <span class="marquee-item">Éditions Limitées</span><span class="marquee-dot">◆</span>
+    <span class="marquee-item">Paiement Sécurisé</span><span class="marquee-dot">◆</span>
+    <span class="marquee-item">Service Client 24/7</span><span class="marquee-dot">◆</span>
+  </div>
 </div>
 
-<div class="container">
+<!-- COLLECTION -->
+<section id="collection">
+  <div class="products-header">
+    <div>
+      <p class="section-label">Notre Sélection</p>
+      <h2 class="section-title">La <em>Collection</em></h2>
+      <div class="divider"></div>
+    </div>
+    <div class="filter-tabs">
+      <button class="filter-tab active" onclick="filterProducts('all', this)">Tout</button>
+      <button class="filter-tab" onclick="filterProducts('new', this)">Nouveau</button>
+      <button class="filter-tab" onclick="filterProducts('sale', this)">En Stock</button>
+    </div>
+  </div>
 
-  <!-- Créer produit -->
-  <div class="card">
-    <div class="card-header purple"><span class="icon">📦</span> Ajouter un produit</div>
-    <div class="card-body">
-      <div class="form-group"><label>Nom</label><input id="p-name" placeholder="ex: Laptop Dell"></div>
-      <div class="form-group"><label>Description</label><input id="p-desc" placeholder="ex: PC portable 15 pouces"></div>
-      <div class="row">
-        <div class="form-group"><label>Prix (€)</label><input id="p-price" type="number" placeholder="999.99"></div>
-        <div class="form-group"><label>Stock</label><input id="p-stock" type="number" placeholder="10"></div>
+  <div id="products-container">
+    <div class="loading-grid">
+      <div class="skeleton"></div>
+      <div class="skeleton"></div>
+      <div class="skeleton"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ORDER -->
+<section class="order-section" id="order">
+  <div class="order-grid">
+    <div class="order-left">
+      <p class="section-label">Passer une commande</p>
+      <h2 class="order-left h2" style="font-family:'Playfair Display',serif;font-size:48px;margin-bottom:20px;">Votre <em style="font-style:italic;color:var(--gold)">Commande</em></h2>
+      <p>Une expérience d'achat unique, des produits d'exception livrés directement chez vous.</p>
+      <div class="trust-item"><div class="trust-icon">🔒</div><div class="trust-text">Paiement 100% sécurisé</div></div>
+      <div class="trust-item"><div class="trust-icon">🚚</div><div class="trust-text">Livraison en 24-48h</div></div>
+      <div class="trust-item"><div class="trust-icon">✨</div><div class="trust-text">Emballage cadeau offert</div></div>
+      <div class="trust-item"><div class="trust-icon">↩️</div><div class="trust-text">Retour gratuit sous 30 jours</div></div>
+    </div>
+    <div class="order-right">
+      <div class="form-group">
+        <label>Votre nom complet</label>
+        <input type="text" id="o-name" placeholder="Jean Dupont">
       </div>
-      <button class="btn-purple" onclick="createProduct()">+ Ajouter le produit</button>
-    </div>
-  </div>
-
-  <!-- Liste produits -->
-  <div class="card">
-    <div class="card-header purple"><span class="icon">🗂️</span> Produits disponibles</div>
-    <div class="card-body">
-      <div class="list" id="products-list"><div class="empty">Aucun produit</div></div>
-      <button class="btn-purple" style="margin-top:12px" onclick="loadProducts()">🔄 Actualiser</button>
-    </div>
-  </div>
-
-  <!-- Créer commande -->
-  <div class="card">
-    <div class="card-header blue"><span class="icon">🛍️</span> Passer une commande</div>
-    <div class="card-body">
-      <div class="form-group"><label>Nom du client</label><input id="o-customer" placeholder="ex: Chiraz"></div>
-      <div class="row">
-        <div class="form-group"><label>ID Produit</label><input id="o-product" type="number" placeholder="1"></div>
-        <div class="form-group"><label>Quantité</label><input id="o-qty" type="number" placeholder="1"></div>
+      <div class="form-group">
+        <label>Produit sélectionné</label>
+        <select id="o-product">
+          <option value="">Choisir un produit...</option>
+        </select>
       </div>
-      <button class="btn-blue" onclick="createOrder()">✓ Commander</button>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Quantité</label>
+          <input type="number" id="o-qty" placeholder="1" min="1" value="1">
+        </div>
+        <div class="form-group">
+          <label>Code promo</label>
+          <input type="text" id="o-promo" placeholder="LUXE10">
+        </div>
+      </div>
+      <button class="submit-btn" onclick="placeOrder()" id="order-btn">
+        Confirmer la commande
+      </button>
     </div>
   </div>
+</section>
 
-  <!-- Liste commandes -->
-  <div class="card">
-    <div class="card-header blue"><span class="icon">📋</span> Commandes</div>
-    <div class="card-body">
-      <div class="list" id="orders-list"><div class="empty">Aucune commande</div></div>
-      <button class="btn-blue" style="margin-top:12px" onclick="loadOrders()">🔄 Actualiser</button>
+<!-- NOTIFICATIONS -->
+<section class="notif-section" id="notifications">
+  <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:60px;">
+    <div>
+      <p class="section-label">Mises à jour en temps réel</p>
+      <h2 class="section-title"><em>Notifications</em></h2>
+      <div class="divider"></div>
     </div>
+    <button class="refresh-btn" onclick="loadNotifications()">
+      <span>↻</span> Actualiser
+    </button>
   </div>
+  <div id="notif-container" class="notif-grid"></div>
+</section>
 
-  <!-- Notifications -->
-  <div class="card full-width">
-    <div class="card-header green"><span class="icon">🔔</span> Notifications Kafka (temps réel)</div>
-    <div class="card-body">
-      <div class="list" id="notifs-list"><div class="empty">Aucune notification</div></div>
-      <button class="btn-green" style="margin-top:12px" onclick="loadNotifs()">🔄 Actualiser</button>
-    </div>
+<footer>
+  <div class="footer-logo">LUXE</div>
+  <div class="footer-text">© 2026 — Tous droits réservés</div>
+  <a href="admin.html" class="footer-link">Espace Admin →</a>
+</footer>
+
+<div class="toast-container" id="toasts"></div>
+
+<!-- Order success modal -->
+<div class="modal-overlay" id="successModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <div style="font-size:48px;margin-bottom:20px;">✓</div>
+    <h3>Commande <em style="color:var(--gold)">Confirmée</em></h3>
+    <p>Votre commande a été passée avec succès. Vous recevrez une confirmation très bientôt.</p>
+    <button class="submit-btn" onclick="closeModal()">Parfait, merci !</button>
   </div>
-
 </div>
-
-<div class="toast" id="toast"></div>
 
 <script>
 const API = 'http://localhost:3000';
 
-function showToast(msg, ok=true) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.style.background = ok ? '#2e7d32' : '#c62828';
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3000);
-}
+// Cursor
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('cursorRing');
+document.addEventListener('mousemove', e => {
+  cursor.style.left = e.clientX - 4 + 'px';
+  cursor.style.top = e.clientY - 4 + 'px';
+  ring.style.left = e.clientX - 18 + 'px';
+  ring.style.top = e.clientY - 18 + 'px';
+});
 
-async function createProduct() {
-  const name = document.getElementById('p-name').value;
-  const description = document.getElementById('p-desc').value;
-  const price = parseFloat(document.getElementById('p-price').value);
-  const stock = parseInt(document.getElementById('p-stock').value);
-  if (!name || !price) return showToast('Remplis tous les champs', false);
-  const res = await fetch(`${API}/products`, {
-    method: 'POST', headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({name, description, price, stock})
-  });
-  const data = await res.json();
-  showToast(`✅ Produit "${data.name}" créé !`);
-  loadProducts();
-}
+// Product images from Unsplash
+const images = [
+  'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=600&q=80',
+  'https://images.unsplash.com/photo-1591561954557-26941169b49e?w=600&q=80',
+  'https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=600&q=80',
+  'https://images.unsplash.com/photo-1606760227091-3dd870d97f1d?w=600&q=80',
+  'https://images.unsplash.com/photo-1598560917505-59a3ad559071?w=600&q=80',
+  'https://images.unsplash.com/photo-1611010344444-5f9e4d86a090?w=600&q=80',
+  'https://images.unsplash.com/photo-1627123424574-724758594e93?w=600&q=80',
+  'https://images.unsplash.com/photo-1615655114865-4cc1bcc46a94?w=600&q=80',
+];
+const badges = ['Nouveau', 'Bestseller', 'Exclusif', 'Limité', ''];
+
+let allProducts = [];
 
 async function loadProducts() {
-  const res = await fetch(`${API}/products`);
-  const products = await res.json();
-  const el = document.getElementById('products-list');
-  if (!products.length) { el.innerHTML = '<div class="empty">Aucun produit</div>'; return; }
-  el.innerHTML = products.map(p => `
-    <div class="list-item product">
-      <strong>${p.name}</strong>
-      ${p.description}
-      <br>
-      <span class="badge price">💶 ${p.price} €</span>
-      <span class="badge stock">📦 Stock: ${p.stock}</span>
-    </div>
-  `).join('');
+  try {
+    const res = await fetch(`${API}/products`);
+    allProducts = await res.json();
+    renderProducts(allProducts);
+    populateSelect(allProducts);
+  } catch {
+    document.getElementById('products-container').innerHTML =
+      '<p style="color:var(--gray);font-style:italic;padding:40px 0">Impossible de charger les produits. Vérifiez que le serveur est actif.</p>';
+  }
 }
 
-async function createOrder() {
-  const customer_name = document.getElementById('o-customer').value;
+function renderProducts(products) {
+  const c = document.getElementById('products-container');
+  if (!products.length) {
+    c.innerHTML = '<div class="empty-state"><div class="empty-icon">✦</div><p class="empty-text">La collection arrive bientôt…</p></div>';
+    return;
+  }
+  c.innerHTML = '<div class="products-grid">' + products.map((p, i) => `
+    <div class="product-card" style="animation:fadeUp 0.6s ${i*0.1}s both">
+      <div class="product-image">
+        <img src="${images[i % images.length]}" alt="${p.name}" loading="lazy">
+        ${badges[i % badges.length] ? `<span class="product-badge">${badges[i % badges.length]}</span>` : ''}
+        <div class="product-overlay">
+          <button class="product-buy-btn" onclick="quickOrder(${p.id}, '${p.name.replace(/'/g,"\\'")}')">
+            Commander rapidement
+          </button>
+        </div>
+      </div>
+      <div class="product-info">
+        <h3 class="product-name">${p.name}</h3>
+        <p class="product-desc">${p.description || 'Pièce d\'exception, soigneusement sélectionnée.'}</p>
+        <div class="product-footer">
+          <span class="product-price">${parseFloat(p.price).toFixed(2)} €</span>
+          <span class="product-stock">${p.stock > 0 ? p.stock + ' en stock' : 'Épuisé'}</span>
+        </div>
+      </div>
+    </div>
+  `).join('') + '</div>';
+}
+
+function filterProducts(type, btn) {
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  if (type === 'all') renderProducts(allProducts);
+  else if (type === 'sale') renderProducts(allProducts.filter(p => p.stock > 0));
+  else renderProducts(allProducts.slice(0, 3));
+}
+
+function populateSelect(products) {
+  const sel = document.getElementById('o-product');
+  sel.innerHTML = '<option value="">Choisir un produit...</option>' +
+    products.map(p => `<option value="${p.id}">${p.name} — ${parseFloat(p.price).toFixed(2)}€</option>`).join('');
+}
+
+function quickOrder(id, name) {
+  document.getElementById('o-product').value = id;
+  document.getElementById('order').scrollIntoView({ behavior: 'smooth' });
+}
+
+async function placeOrder() {
+  const name = document.getElementById('o-name').value.trim();
   const product_id = parseInt(document.getElementById('o-product').value);
   const quantity = parseInt(document.getElementById('o-qty').value);
-  if (!customer_name || !product_id) return showToast('Remplis tous les champs', false);
-  const res = await fetch(`${API}/orders`, {
-    method: 'POST', headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({customer_name, product_id, quantity})
-  });
-  const data = await res.json();
-  showToast(`✅ Commande #${data.id} créée ! Kafka notifie...`);
-  loadOrders();
-  setTimeout(loadNotifs, 1000);
+  if (!name || !product_id || !quantity) { showToast('Veuillez remplir tous les champs', true); return; }
+  const btn = document.getElementById('order-btn');
+  btn.disabled = true; btn.textContent = 'Traitement en cours…';
+  try {
+    const res = await fetch(`${API}/orders`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ product_id, quantity, customer_name: name })
+    });
+    if (res.ok) {
+      document.getElementById('successModal').classList.add('open');
+      document.getElementById('o-name').value = '';
+      document.getElementById('o-product').value = '';
+      document.getElementById('o-qty').value = '1';
+      setTimeout(loadNotifications, 1500);
+    } else { showToast('Erreur lors de la commande', true); }
+  } catch { showToast('Serveur inaccessible', true); }
+  finally { btn.disabled = false; btn.textContent = 'Confirmer la commande'; }
 }
 
-async function loadOrders() {
-  const res = await fetch(`${API}/orders`);
-  const orders = await res.json();
-  const el = document.getElementById('orders-list');
-  if (!orders.length) { el.innerHTML = '<div class="empty">Aucune commande</div>'; return; }
-  el.innerHTML = orders.map(o => `
-    <div class="list-item order">
-      <strong>Commande #${o.id} — ${o.customer_name}</strong>
-      Produit #${o.product_id} × ${o.quantity}
-      <br><span class="badge pending">⏳ ${o.status}</span>
-    </div>
-  `).join('');
+async function loadNotifications() {
+  try {
+    const res = await fetch(`${API}/notifications`);
+    const data = await res.json();
+    const c = document.getElementById('notif-container');
+    if (!data.length) {
+      c.innerHTML = '<div class="empty-state"><div class="empty-icon">🔔</div><p class="empty-text">Aucune notification pour le moment</p></div>';
+      return;
+    }
+    c.innerHTML = data.slice().reverse().map((n, i) => `
+      <div class="notif-card" style="animation:fadeUp 0.5s ${i*0.08}s both">
+        <div class="notif-type">${n.type || 'Événement'}</div>
+        <div class="notif-message">${n.message}</div>
+        <div class="notif-time">${n.created_at ? new Date(n.created_at).toLocaleString('fr-FR') : 'À l\'instant'}</div>
+      </div>
+    `).join('');
+  } catch {
+    document.getElementById('notif-container').innerHTML =
+      '<div class="empty-state"><div class="empty-icon">⚡</div><p class="empty-text">Connexion aux notifications impossible</p></div>';
+  }
 }
 
-async function loadNotifs() {
-  const res = await fetch(`${API}/notifications`);
-  const notifs = await res.json();
-  const el = document.getElementById('notifs-list');
-  if (!notifs.length) { el.innerHTML = '<div class="empty">Aucune notification</div>'; return; }
-  el.innerHTML = notifs.map(n => `
-    <div class="list-item notif">
-      <strong>🔔 ${n.type.toUpperCase()}</strong>
-      ${n.message}
-      <br><span style="font-size:11px;color:#aaa">${new Date(n.created_at).toLocaleString()}</span>
-    </div>
-  `).join('');
+function showToast(msg, isError = false) {
+  const tc = document.getElementById('toasts');
+  const t = document.createElement('div');
+  t.className = 'toast' + (isError ? ' error' : '');
+  t.innerHTML = `<span class="toast-icon">${isError ? '⚠' : '✓'}</span><span class="toast-msg">${msg}</span>`;
+  tc.appendChild(t);
+  setTimeout(() => t.remove(), 4000);
 }
 
-// Chargement initial
-loadProducts(); loadOrders(); loadNotifs();
+function closeModal() {
+  document.getElementById('successModal').classList.remove('open');
+}
 
-// Auto-refresh notifications toutes les 5 secondes
-setInterval(loadNotifs, 5000);
+loadProducts();
+loadNotifications();
 </script>
 </body>
 </html>
